@@ -1,6 +1,6 @@
 # MoneyTree
 
-MoneyTree is a modern AI-powered personal finance dashboard built with Next.js, Tailwind CSS, Framer Motion, NextAuth.js, Firebase, Plaid, and OpenAI. It features animated pages, professional UI, dark/light mode, sidebar navigation, real account linking, AI advice, and data persistence.
+AI-powered personal finance dashboard built with Next.js, Tailwind CSS, Framer Motion, NextAuth.js, Firebase, Plaid, and OpenAI. Features animated pages, professional UI, dark/light mode, sidebar navigation, real account linking, AI advice, and data persistence.
 
 ## Features
 - **Authentication**: Sign in with Google via NextAuth.js (cookies-based)
