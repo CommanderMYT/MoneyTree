@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid';
+import { Configuration, PlaidApi, PlaidEnvironments, Products, CountryCode } from 'plaid';
 
 const configuration = new Configuration({
   basePath: PlaidEnvironments.sandbox,
@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
     const response = await client.linkTokenCreate({
       user: { client_user_id: userId },
       client_name: 'MoneyTree',
-      products: ['transactions'],
-      country_codes: ['US'],
+      products: [Products.Transactions],
+      country_codes: [CountryCode.Us],
       language: 'en',
     });
 

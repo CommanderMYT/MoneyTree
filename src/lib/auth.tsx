@@ -1,84 +1,45 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { initFirebase, getFirebaseAuth } from "./firebase";
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as fbSignOut } from "firebase/auth";
+import { useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from "next-auth/react";
 
-export type User = { uid: string; email: string } | null;
+export type User = { uid: string; email: string; name?: string; image?: string } | null;
 
 type AuthContextType = {
   user: User;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signIn: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function hasFirebaseConfig() {
-  return !!(
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
-    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN &&
-    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-  );
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<User>(null);
-  const [loading, setLoading] = useState(true);
+  const loading = status === "loading";
 
   useEffect(() => {
-    if (hasFirebaseConfig()) {
-      initFirebase();
-      const auth = getFirebaseAuth();
-      try {
-        const unsub = onAuthStateChanged(auth, (u) => {
-          if (u) setUser({ uid: u.uid, email: u.email ?? "" });
-          else setUser(null);
-          setLoading(false);
-        });
-        return () => unsub();
-      } catch {
-        // fallback to local
-      }
+    if (session?.user) {
+      setUser({
+        uid: (session.user as any).id || session.user.email || "",
+        email: session.user.email || "",
+        name: session.user.name || "",
+        image: session.user.image || "",
+      });
+    } else {
+      setUser(null);
     }
-    const raw = typeof window !== "undefined" ? localStorage.getItem("mt_user") : null;
-    if (raw) setUser(JSON.parse(raw));
-    setLoading(false);
-  }, []);
+  }, [session]);
 
-  const signIn = async (email: string, password: string) => {
-    if (hasFirebaseConfig()) {
-      const auth = getFirebaseAuth();
-      await signInWithEmailAndPassword(auth, email, password);
-      return;
-    }
-    const u = { uid: "demo-uid", email };
-    localStorage.setItem("mt_user", JSON.stringify(u));
-    setUser(u);
-  };
-
-  const signUp = async (email: string, password: string) => {
-    if (hasFirebaseConfig()) {
-      const auth = getFirebaseAuth();
-      await createUserWithEmailAndPassword(auth, email, password);
-      return;
-    }
-    const u = { uid: "demo-uid", email };
-    localStorage.setItem("mt_user", JSON.stringify(u));
-    setUser(u);
+  const signIn = async () => {
+    await nextAuthSignIn("google");
   };
 
   const signOut = async () => {
-    if (hasFirebaseConfig()) {
-      const auth = getFirebaseAuth();
-      await fbSignOut(auth);
-    }
-    localStorage.removeItem("mt_user");
-    setUser(null);
+    await nextAuthSignOut();
   };
 
-  const value: AuthContextType = { user, loading, signIn, signUp, signOut };
+  const value: AuthContextType = { user, loading, signIn, signOut };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
