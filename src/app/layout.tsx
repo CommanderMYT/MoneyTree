@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
-import Toast from "../components/Toast";
-import PWA from "../components/PWA";
-import ErrorBoundary from "../components/ErrorBoundary";
-import Onboarding from "../components/Onboarding";
-import LoadingScreen from "../components/LoadingScreen";
+import Providers from "../components/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,15 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground transition-colors duration-500`}>
-        <ErrorBoundary>
-          <SessionProvider>
-            <LoadingScreen />
-            {children}
-            <Toast />
-            <PWA />
-            <Onboarding />
-          </SessionProvider>
-        </ErrorBoundary>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
